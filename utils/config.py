@@ -144,11 +144,11 @@ class YOLOConfig:
     wandb_name: str = "scar_detection"
     wandb_mode: str = "disabled"
 
-    
+
 @dataclass
 class YoloSAMInferenceConfig:
-    yolo_checkpoint_path: str = "checkpoints/yolo11n.pt"
-    sam_checkpoint_path: str = "checkpoints/sam_vit_b_01ec64.pth"
+    yolo_checkpoint_path: str = "%s/yolosam/yolo11n.pt" % os.environ["savemodel"]
+    sam_checkpoint_path: str = "%s/sam/sam_vit_b_01ec64.pth" % os.environ["savemodel"]
     device: str = "cpu"
     yolo_conf_threshold: float = 0.25
     yolo_iou_threshold: float = 0.45

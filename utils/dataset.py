@@ -14,6 +14,7 @@ from utils.config import SAMDatasetConfig
 from utils.prompt import BoxPromptGenerator, PointPromptGenerator
 from utils.z_score_norm import PercentileNormalize
 
+
 class SAMDataset(torch.utils.data.Dataset):
     def __init__(self, config: Union[Dict, SAMDatasetConfig]):
         self.config = config if isinstance(config, SAMDatasetConfig) else SAMDatasetConfig(**config)
@@ -188,7 +189,8 @@ class SAMDataset(torch.utils.data.Dataset):
             'boxes': boxes,
             'image_name': os.path.basename(self.image_paths[idx])
         }
-    
+
+
 if __name__ == "__main__":
     # Test dataset
     config = SAMDatasetConfig(

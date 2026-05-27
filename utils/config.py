@@ -32,6 +32,7 @@ class SAMFinetuneConfig:
     wandb_mode: str = "disabled"
     
     
+    
 @dataclass
 class SAMDatasetConfig:
     dataset_path: str = "data/dataset"
@@ -80,7 +81,6 @@ class SAMDatasetConfig:
     
     # sample size (For testing)
     sample_size: int = 100
-
 
 @dataclass
 class YOLOConfig:
@@ -143,16 +143,14 @@ class YOLOConfig:
     wandb_project: str = "YOLO-training"
     wandb_name: str = "scar_detection"
     wandb_mode: str = "disabled"
-
-
+    
 @dataclass
 class YoloSAMInferenceConfig:
-    yolo_checkpoint_path: str = "%s/yolosam/yolo11n.pt" % os.environ["savemodel"]
-    sam_checkpoint_path: str = "%s/sam/sam_vit_b_01ec64.pth" % os.environ["savemodel"]
+    yolo_checkpoint_path: str = "checkpoints/yolo11n.pt"
+    sam_checkpoint_path: str = "checkpoints/sam_vit_b_01ec64.pth"
     device: str = "cpu"
     yolo_conf_threshold: float = 0.25
     yolo_iou_threshold: float = 0.45
     yolo_max_detections: int = 1
     
     
-

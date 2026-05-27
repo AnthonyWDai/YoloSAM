@@ -296,7 +296,7 @@ def main():
     args = parse_args()
     
     finetune_config = SAMFinetuneConfig(
-        device='cpu',
+        device='cuda',
         wandb_project='SAM_finetune',
         wandb_name='test_run',
         model_type='vit_b',
@@ -315,7 +315,7 @@ def main():
     train_dataset_config = SAMDatasetConfig(
         dataset_path='%s/train/' % args.dataset_path,
         remove_nonscar=True,
-        sample_size=2,
+        sample_size=None,
         point_prompt=True,
         point_prompt_types=['positive'],
         num_points=3,
@@ -329,7 +329,7 @@ def main():
     val_dataset_config = SAMDatasetConfig(
         dataset_path='%s/val/' % args.dataset_path,
         remove_nonscar=True,
-        sample_size=2,
+        sample_size=None,
         point_prompt=True,
         point_prompt_types=['positive'],
         num_points=3,

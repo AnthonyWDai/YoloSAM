@@ -14,7 +14,7 @@ class YOLOModel:
         self.device = config.device
         self.model = None
         self.dataset_yaml_path = None
-        
+
         # Initialize model
         self.load_model()
         

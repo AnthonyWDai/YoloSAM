@@ -33,7 +33,6 @@ class SAMFinetuneConfig:
     wandb_mode: str = "disabled"
     
     
-    
 @dataclass
 class SAMDatasetConfig:
     dataset_path: str = "data/dataset"
@@ -82,6 +81,7 @@ class SAMDatasetConfig:
     
     # sample size (For testing)
     sample_size: int = 100
+
 
 @dataclass
 class YOLOConfig:

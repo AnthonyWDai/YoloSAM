@@ -7,6 +7,7 @@ from tqdm import tqdm
 from typing import Optional
 
 import torch
+import ultralytics
 
 from models.yolo import YOLOModel
 from utils.config import YOLOConfig
@@ -46,7 +47,7 @@ class YOLOTrainer:
         
         # Let YOLO handle directory creation
         results = self.model.train(
-            project="runs",
+            project=self.config.output_path,
             name=self.config.project_name,
         )
         
@@ -144,9 +145,9 @@ def parse_args():
         help="Path to validation dataset",
     )
     parser.add_argument(
-        "--pretrained_path",
+        "--model_type",
         type=str,
-        default=YOLOConfig.pretrained_path,
+        default=YOLOConfig.model_type,
         help="Path to pretrained checkpoint",
     )
     parser.add_argument(
@@ -172,10 +173,9 @@ def main():
 
     config = YOLOConfig(
         # Model settings
-        model_type="yolo11n",
-        device="cpu",
-        pretrained_path=args.pretrained_path,
-        # checkpoint_path=args.output_path,
+        model_type=args.model_type,
+        device="cuda",
+        output_path=args.output_path,
         
         # Dataset paths
         dataset_path=args.dataset_path,
@@ -212,6 +212,10 @@ def main():
         wandb_name="scar_detection_v1",
         wandb_mode="disabled"  # Set to "online" to enable wandb logging
     )
+
+    ultralytics.settings.update({
+        "runs_dir": config.output_path,
+    })
     
     # Create trainer
     trainer = YOLOTrainer(config)

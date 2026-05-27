@@ -121,8 +121,7 @@ class SAMDataset(torch.utils.data.Dataset):
             )
 
         samples = []
-
-        # image_folder is not working
+        
         if has_subdirs:
             # Image-folder style
             for folder_name in image_entries:
@@ -139,7 +138,8 @@ class SAMDataset(torch.utils.data.Dataset):
                 for file_name in sorted(os.listdir(image_subdir)):
                     if not self._is_image_file(file_name):
                         continue
-
+                    
+                    # TODO: only support jpg image and png mask
                     image_path = os.path.join(image_subdir, file_name)
                     mask_path = os.path.join(mask_subdir, file_name).replace(".jpg", ".png")
 
@@ -158,7 +158,8 @@ class SAMDataset(torch.utils.data.Dataset):
             for file_name in image_entries:
                 if not self._is_image_file(file_name):
                     continue
-
+                
+                # TODO: only support jpg image and png mask
                 image_path = os.path.join(image_dir, file_name)
                 mask_path = os.path.join(mask_dir, file_name).replace(".jpg", ".png")
 

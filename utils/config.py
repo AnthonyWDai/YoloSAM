@@ -15,6 +15,7 @@ class SAMFinetuneConfig:
     image_size: int = 1024
     
     # training
+    freeze: int = 0
     batch_size: int = 2
     num_epochs: int = 100
     

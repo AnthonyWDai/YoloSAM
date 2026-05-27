@@ -25,14 +25,11 @@ class TrainSAM:
         self.device = torch.device(config.device)
     
         self.output_dir = self.config.output_path
+        self.output_dir = "%s_Fr%d_Lr%f" % (
+            self.output_dir, self.config.freeze, self.config.learning_rate
+        )
         os.makedirs(self.output_dir, exist_ok=True)
 
-        self.run_number = 0
-        while os.path.exists(os.path.join(self.output_dir, f'run_{self.run_number}')):
-            self.run_number += 1
-        self.run_name = f'run_{self.run_number}'
-        self.output_dir = os.path.join(self.output_dir, self.run_name)
-        
         # Initialize wandb
         self.init_wandb()
         
@@ -287,6 +284,7 @@ def parse_args():
     parser.add_argument("--sam_path", type=str, default="facebook/sam-vit-base")
     parser.add_argument("--output_path", type=str, default="./output")
     parser.add_argument("--dataset_path", type=str, default="./data")
+    parser.add_argument("--freeze", type=int, default=1)
     parser.add_argument("--learning_rate", type=float, default=1e-4)
 
     return parser.parse_args()
@@ -302,6 +300,7 @@ def main():
         model_type='vit_b',
         sam_path=args.sam_path,
         output_path=args.output_path,
+        freeze=args.freeze,
         num_epochs=20,
         batch_size=2,
         learning_rate=args.learning_rate,

@@ -17,6 +17,28 @@ class SAMModel(nn.Module):
         self.image_encoder = self.model.image_encoder.to(self.device)
         self.mask_decoder = self.model.mask_decoder.to(self.device)
         self.prompt_encoder = self.model.prompt_encoder.to(self.device)
+
+        # Freeze prompt encoder
+        if config.freeze >= 1:
+            for p in self.prompt_encoder.parameters():
+                p.requires_grad = False
+
+        # Freeze image encoder
+        if config.freeze >= 2:
+            for p in self.image_encoder.parameters():
+                p.requires_grad = False
+
+        # Train mask decoder
+        if config.freeze >= 3:
+            for p in self.mask_decoder.iou_token.parameters():
+                p.requires_grad = False
+
+            for p in self.mask_decoder.mask_tokens.parameters():
+                p.requires_grad = False
+
+        if config.freeze >= 4:
+            for p in self.mask_decoder.transformer.parameters():
+                p.requires_grad = False
         
         # Free memory
         del self.model

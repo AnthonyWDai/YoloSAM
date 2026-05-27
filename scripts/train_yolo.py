@@ -52,7 +52,7 @@ class YOLOTrainer:
         
         # Get the actual output directory that YOLO created
         # YOLO creates: runs/{project_name}/{run_name}
-        self.output_dir = self.config.checkpoint_path
+        self.output_dir = self.config.output_path
         self.run_name = results.save_dir.name
         
         print(f"YOLO created output directory: {self.output_dir}")
@@ -150,9 +150,9 @@ def parse_args():
         help="Path to pretrained checkpoint",
     )
     parser.add_argument(
-        "--checkpoint_path",
+        "--output_path",
         type=str,
-        default=YOLOConfig.checkpoint_path,
+        default=YOLOConfig.output_path,
         help="Path to training checkpoint",
     )
     parser.add_argument(
@@ -175,7 +175,7 @@ def main():
         model_type="yolo11n",
         device="cpu",
         pretrained_path=args.pretrained_path,
-        checkpoint_path=args.checkpoint_path,
+        # checkpoint_path=args.output_path,
         
         # Dataset paths
         dataset_path=args.dataset_path,

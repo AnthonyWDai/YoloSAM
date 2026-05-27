@@ -10,6 +10,7 @@ class SAMFinetuneConfig:
     num_workers: int = 1
     sam_path: str = "pretrained/sam_vit_h_4b8939.pth"
     checkpoint_path: Optional[str] = None
+    output_path: Optional[str] = None
     model_type: str = "vit_b"
     image_size: int = 1024
     
@@ -89,6 +90,7 @@ class YOLOConfig:
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     checkpoint_path: Optional[str] = None
     pretrained_path: Optional[str] = None
+    output_path: Optional[str] = None
     
     # Dataset configuration
     dataset_path: str = "data/train"

@@ -24,7 +24,7 @@ class TrainSAM:
         self.config = config
         self.device = torch.device(config.device)
     
-        self.output_dir = self.config.checkpoint_path
+        self.output_dir = self.config.output_path
         os.makedirs(self.output_dir, exist_ok=True)
 
         self.run_number = 0
@@ -110,6 +110,7 @@ class TrainSAM:
             self.output_dir,
             f'checkpoint_epoch_{self.current_epoch}.pth'
         )
+        os.makedirs(checkpoint_path, exist_ok=True)
         torch.save(checkpoint, checkpoint_path)
         
         # Save best checkpoint if this is the best model
@@ -284,7 +285,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train SAM finetuning")
 
     parser.add_argument("--sam_path", type=str, default="facebook/sam-vit-base")
-    parser.add_argument("--checkpoint_path", type=str, default="./checkpoints")
+    parser.add_argument("--output_path", type=str, default="./output")
     parser.add_argument("--dataset_path", type=str, default="./data")
     parser.add_argument("--learning_rate", type=float, default=1e-4)
 
@@ -300,7 +301,7 @@ def main():
         wandb_name='test_run',
         model_type='vit_b',
         sam_path=args.sam_path,
-        checkpoint_path=args.checkpoint_path,
+        output_path=args.output_path,
         num_epochs=20,
         batch_size=2,
         learning_rate=args.learning_rate,

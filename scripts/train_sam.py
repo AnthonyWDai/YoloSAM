@@ -300,6 +300,7 @@ def main():
         wandb_name='test_run',
         model_type='vit_b',
         sam_path=args.sam_path,
+        checkpoint_path=args.checkpoint_path,
         num_epochs=20,
         batch_size=2,
         learning_rate=args.learning_rate,
@@ -344,6 +345,6 @@ def main():
     trainer = TrainSAM(finetune_config, train_dataset, val_dataset)
     trainer.train(finetune_config.num_epochs)
 
-        
+
 if __name__ == "__main__":
     main()

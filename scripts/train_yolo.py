@@ -1,10 +1,12 @@
-import torch
 import os
 from pathlib import Path
+
 import wandb
-import yaml
+import argparse
 from tqdm import tqdm
 from typing import Optional
+
+import torch
 
 from models.yolo import YOLOModel
 from utils.config import YOLOConfig
@@ -126,18 +128,58 @@ class YOLOTrainer:
         print(f"Test predictions saved to: {output_path}")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="YOLO training config")
+
+    parser.add_argument(
+        "--dataset_path",
+        type=str,
+        default=YOLOConfig.dataset_path,
+        help="Path to training dataset",
+    )
+    parser.add_argument(
+        "--val_dataset_path",
+        type=str,
+        default=YOLOConfig.val_dataset_path,
+        help="Path to validation dataset",
+    )
+    parser.add_argument(
+        "--pretrained_path",
+        type=str,
+        default=YOLOConfig.pretrained_path,
+        help="Path to pretrained checkpoint",
+    )
+    parser.add_argument(
+        "--checkpoint_path",
+        type=str,
+        default=YOLOConfig.checkpoint_path,
+        help="Path to training checkpoint",
+    )
+    parser.add_argument(
+        "--learning_rate",
+        type=float,
+        default=YOLOConfig.learning_rate,
+        help="Learning rate",
+    )
+
+    return parser.parse_args()
+
+
 def main():
     """Main training function"""
     # Configuration
+    args = parse_args()
+
     config = YOLOConfig(
         # Model settings
         model_type="yolo11n",
         device="cpu",
-        pretrained_path="./checkpoints",
+        pretrained_path=args.pretrained_path,
+        checkpoint_path=args.checkpoint_path,
         
         # Dataset paths
-        dataset_path="./sample_data/train",
-        val_dataset_path="./sample_data/val",
+        dataset_path=args.dataset_path,
+        val_dataset_path=args.val_dataset_path,
         class_names=['scar'],
         
         # Training parameters
@@ -157,6 +199,9 @@ def main():
         iou_threshold=0.2,
         conf_threshold=0.15,
         max_detections=1,
+
+        # Optimizer parameters
+        learning_rate=args.learning_rate,
         
         # Project settings
         project_name="yolo_scar_detection",

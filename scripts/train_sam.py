@@ -1,10 +1,11 @@
 import torch
 from torch.utils.data import DataLoader
-from typing import Optional, Dict
+
 import os
-from tqdm import tqdm
 import wandb
+import argparse
 import numpy as np
+from tqdm import tqdm
 from monai.metrics import DiceMetric
 
 from models.sam import SAMModel
@@ -277,18 +278,31 @@ class TrainSAM:
         
         wandb.finish()
         print(f"Training completed. Best validation dice: {self.best_val_dice:.4f}")
-        
-        
-if __name__ == "__main__":
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train SAM finetuning")
+
+    parser.add_argument("--sam_path", type=str, default="facebook/sam-vit-base")
+    parser.add_argument("--checkpoint_path", type=str, default="./checkpoints")
+    parser.add_argument("--dataset_path", type=str, default="./data")
+    parser.add_argument("--learning_rate", type=float, default=1e-4)
+
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    
     finetune_config = SAMFinetuneConfig(
         device='cpu',
         wandb_project='SAM_finetune',
         wandb_name='test_run',
         model_type='vit_b',
-        sam_path='checkpoints/sam_vit_b_01ec64.pth',
+        sam_path=args.sam_path,
         num_epochs=20,
         batch_size=2,
-        learning_rate=1e-5,
+        learning_rate=args.learning_rate,
         weight_decay=1e-4,
         lambda_bce=0.2,
         lambda_kl=0.2,
@@ -297,7 +311,7 @@ if __name__ == "__main__":
         num_workers=0
     )
     train_dataset_config = SAMDatasetConfig(
-        dataset_path='./sample_data/train/',
+        dataset_path='%s/train/' % args.dataset_path,
         remove_nonscar=True,
         sample_size=2,
         point_prompt=True,
@@ -311,7 +325,7 @@ if __name__ == "__main__":
     )
     
     val_dataset_config = SAMDatasetConfig(
-        dataset_path='./sample_data/val/',
+        dataset_path='%s/val/' % args.dataset_path,
         remove_nonscar=True,
         sample_size=2,
         point_prompt=True,
@@ -329,3 +343,7 @@ if __name__ == "__main__":
 
     trainer = TrainSAM(finetune_config, train_dataset, val_dataset)
     trainer.train(finetune_config.num_epochs)
+
+        
+if __name__ == "__main__":
+    main()

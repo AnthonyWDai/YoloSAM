@@ -52,7 +52,7 @@ class YOLOTrainer:
         
         # Get the actual output directory that YOLO created
         # YOLO creates: runs/{project_name}/{run_name}
-        self.output_dir = Path("runs") / self.config.project_name / results.save_dir.name
+        self.output_dir = self.config.checkpoint_path
         self.run_name = results.save_dir.name
         
         print(f"YOLO created output directory: {self.output_dir}")

@@ -24,7 +24,7 @@ class TrainSAM:
         self.config = config
         self.device = torch.device(config.device)
     
-        self.output_dir = os.path.join('runs', config.wandb_name)
+        self.output_dir = self.config.checkpoint_path
         os.makedirs(self.output_dir, exist_ok=True)
 
         self.run_number = 0

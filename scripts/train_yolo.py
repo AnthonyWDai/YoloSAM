@@ -53,14 +53,14 @@ class YOLOTrainer:
         
         # Get the actual output directory that YOLO created
         # YOLO creates: runs/{project_name}/{run_name}
-        self.output_dir = self.config.output_path
         self.run_name = results.save_dir.name
+        self.output_dir = self.config.output_path / self.config.project_name / self.run_name
         
         print(f"YOLO created output directory: {self.output_dir}")
         
         # Initialize wandb with the actual run name
         self.init_wandb(self.run_name)
-    
+        
         # Get training results and log to wandb
         if self.config.wandb_mode != 'disabled':
             self.log_results(results)

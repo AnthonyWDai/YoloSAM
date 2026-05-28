@@ -40,6 +40,7 @@ class Mask2YOLOConverter:
         bboxes = []
         height, width = mask.shape
 
+        # the function actually separate instance same classes
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
 

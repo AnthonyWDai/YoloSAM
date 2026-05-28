@@ -112,11 +112,11 @@ class TrainSAM:
         }
         
         # Save regular checkpoint
+        os.makedirs(self.output_dir, exist_ok=True)
         checkpoint_path = os.path.join(
             self.output_dir,
             f'checkpoint_epoch_{self.current_epoch}.pth'
         )
-        os.makedirs(checkpoint_path, exist_ok=True)
         torch.save(checkpoint, checkpoint_path)
         
         # Save best checkpoint if this is the best model

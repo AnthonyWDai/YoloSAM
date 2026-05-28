@@ -180,7 +180,7 @@ def main():
         # Dataset paths
         dataset_path=args.dataset_path,
         val_dataset_path=args.val_dataset_path,
-        class_names=['scar'],
+        class_names=['pl'],
         
         # Training parameters
         epochs=10,
@@ -204,12 +204,12 @@ def main():
         learning_rate=args.learning_rate,
         
         # Project settings
-        project_name="yolo_scar_detection",
-        experiment_name="enhanced_scar_detection",
+        project_name="yolo_pl_detection",
+        experiment_name="enhanced_pl_detection",
         
         # Wandb settings
-        wandb_project="YOLO-scar-detection",
-        wandb_name="scar_detection_v1",
+        wandb_project="YOLO-pl-detection",
+        wandb_name="pl_detection_v1",
         wandb_mode="disabled"  # Set to "online" to enable wandb logging
     )
 

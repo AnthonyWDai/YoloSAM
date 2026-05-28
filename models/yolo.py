@@ -65,6 +65,7 @@ class YOLOModel:
             'imgsz': self.config.image_size,
             'batch': self.config.batch_size,
             'patience': self.config.patience,
+            'save_dir': self.config.output_path,
             
             # Detection parameters
             'box': self.config.box_loss_gain,

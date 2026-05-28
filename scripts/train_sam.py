@@ -23,10 +23,16 @@ class TrainSAM:
     ):
         self.config = config
         self.device = torch.device(config.device)
-    
+
+        self.run_number = 0
+        while os.path.exists(os.path.join(self.output_dir, f'run_{self.run_number}')):
+            self.run_number += 1
+        self.run_name = f'run_{self.run_number}'
+
         self.output_dir = self.config.output_path
-        self.output_dir = "%s_Fr%d_Lr%f" % (
-            self.output_dir, self.config.freeze, self.config.learning_rate
+        self.output_dir = "%s_Fr%d_Lr%f_%s" % (
+            self.output_dir, self.config.freeze, 
+            self.config.learning_rate, self.run_name,
         )
         os.makedirs(self.output_dir, exist_ok=True)
 

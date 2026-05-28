@@ -30,14 +30,13 @@ class TrainSAM:
         )
 
         self.run_number = 0
-        ExistFlag = os.path.exists("%s/_run%d" % (self.output_dir, self.run_number))
+        ExistFlag = os.path.exists("%s_run%d" % (self.output_dir, self.run_number))
         if ExistFlag:
-            while os.path.exists("%s/_run%d" % (self.output_dir, self.run_number)):
+            while os.path.exists("%s_run%d" % (self.output_dir, self.run_number)):
                 self.run_number += 1
-        else:
-            self.run_name = f'_run{self.run_number}'
+        self.run_name = f'_run{self.run_number}'
 
-        self.output_dir = "%s/_run%d" % (self.output_dir, self.run_number)
+        self.output_dir = "%s_run%d" % (self.output_dir, self.run_number)
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Initialize wandb

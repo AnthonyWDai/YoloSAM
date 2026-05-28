@@ -46,7 +46,7 @@ class YOLOModel:
             'nc': len(self.config.class_names)
         }
         
-        self.dataset_yaml_path = Path(self.config.dataset_path).parent / 'dataset.yaml'
+        self.dataset_yaml_path = '%s/dataset.yaml' % Path(self.config.dataset_path).parent
         with open(self.dataset_yaml_path, 'w') as f:
             yaml.dump(data_yaml, f)
         

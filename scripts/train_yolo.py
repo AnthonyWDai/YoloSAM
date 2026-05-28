@@ -54,7 +54,9 @@ class YOLOTrainer:
         # Get the actual output directory that YOLO created
         # YOLO creates: runs/{project_name}/{run_name}
         self.run_name = results.save_dir.name
-        self.output_dir = self.config.output_path / self.config.project_name / self.run_name
+        self.output_dir = "%s/%s/%s" % (
+            self.config.output_path, self.config.project_name, self.run_name
+        )
         
         print(f"YOLO created output directory: {self.output_dir}")
         
@@ -99,7 +101,7 @@ class YOLOTrainer:
     def test_predictions(self, test_images_path: str, output_path: Optional[str] = None):
         """Test the model on sample images"""
         if output_path is None:
-            output_path = self.output_dir / 'test_predictions'
+            output_path = "%s/test_predictions" % self.output_dir
         
         output_path = Path(output_path)
         output_path.mkdir(parents=True, exist_ok=True)
@@ -116,7 +118,7 @@ class YOLOTrainer:
             # Save prediction
             if results and len(results) > 0:
                 result = results[0]
-                result.save(filename=str(output_path / f"pred_{image_path.name}"))
+                result.save(filename=str("%s/%s" % (output_path, f"pred_{image_path.name}")))
                 
                 # Log detection info
                 if len(result.boxes) > 0:

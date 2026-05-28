@@ -24,16 +24,20 @@ class TrainSAM:
         self.config = config
         self.device = torch.device(config.device)
 
-        self.run_number = 0
-        while os.path.exists(os.path.join(self.output_dir, f'run_{self.run_number}')):
-            self.run_number += 1
-        self.run_name = f'run_{self.run_number}'
-
         self.output_dir = self.config.output_path
-        self.output_dir = "%s_Fr%d_Lr%f_%s" % (
-            self.output_dir, self.config.freeze, 
-            self.config.learning_rate, self.run_name,
+        self.output_dir = "%s_Fr%d_Lr%f" % (
+            self.output_dir, self.config.freeze, self.config.learning_rate,
         )
+
+        self.run_number = 0
+        ExistFlag = os.path.exists("%s/_run%d" % (self.output_dir, self.run_number))
+        if ExistFlag:
+            while os.path.exists("%s/_run%d" % (self.output_dir, self.run_number)):
+                self.run_number += 1
+        else:
+            self.run_name = f'_run{self.run_number}'
+
+        self.output_dir = "%s/_run%d" % (self.output_dir, self.run_number)
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Initialize wandb

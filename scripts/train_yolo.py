@@ -206,8 +206,8 @@ def main():
         learning_rate=args.learning_rate,
         
         # Project settings
-        project_name="yolo_pl_detection",
-        experiment_name="enhanced_pl_detection",
+        project_name="yolo_pl_detection_lr%f" % args.learning_rate,
+        experiment_name="enhanced_pl_detection_lr%f" % args.learning_rate,
         
         # Wandb settings
         wandb_project="YOLO-pl-detection",

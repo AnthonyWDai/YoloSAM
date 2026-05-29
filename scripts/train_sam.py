@@ -310,7 +310,7 @@ def main():
         sam_path=args.sam_path,
         output_path=args.output_path,
         freeze=args.freeze,
-        num_epochs=20,
+        num_epochs=50,
         batch_size=2,
         learning_rate=args.learning_rate,
         weight_decay=1e-4,

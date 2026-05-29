@@ -185,7 +185,7 @@ def main():
         class_names=['pl'],
         
         # Training parameters
-        epochs=10,
+        epochs=1000,
         batch_size=16,
         image_size=640,
         patience=50,

@@ -112,10 +112,10 @@ class YOLOConfig:
     # Detection parameters
     iou_threshold: float = 0.2
     conf_threshold: float = 0.15
-    max_detections: int = 1
+    max_detections: int = 30
     
     # Augmentation parameters
-    mosaic: float = 0.9
+    mosaic: float = 0.1
     mixup: float = 0.1
     copy_paste: float = 0.4
     scale: float = 0.5
@@ -125,12 +125,12 @@ class YOLOConfig:
     translate: float = 0.3
     hsv_h: float = 0.0
     hsv_s: float = 0.0
-    hsv_v: float = 0.3
+    hsv_v: float = 0.0
     
     # Optimizer parameters
     learning_rate: float = 0.001
     final_lr_ratio: float = 0.0001
-    warmup_epochs: int = 10
+    warmup_epochs: int = 30
     weight_decay: float = 0.001
     
     # Training settings

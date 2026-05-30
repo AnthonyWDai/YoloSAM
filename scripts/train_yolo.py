@@ -166,7 +166,7 @@ def parse_args():
     )
     parser.add_argument(
         "--batch_size",
-        type=float,
+        type=int,
         default=YOLOConfig.batch_size,
     )
 

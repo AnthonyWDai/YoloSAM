@@ -89,9 +89,9 @@ class YOLOConfig:
     # Model configuration
     model_type: str = "yolo11n"
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
-    # ValueError: Expected more than 1 value per channel when training, got input size torch.Size([1, 256, 1, 1])
-    # https://docs.ultralytics.com/modes/train#musgd-optimizer
-    compile: Optional[bool] = True
+    # # ValueError: Expected more than 1 value per channel when training, got input size torch.Size([1, 256, 1, 1])
+    # # https://docs.ultralytics.com/modes/train#musgd-optimizer
+    # compile: Optional[bool] = True
     checkpoint_path: Optional[str] = None
     pretrained_path: Optional[str] = None
     output_path: Optional[str] = None

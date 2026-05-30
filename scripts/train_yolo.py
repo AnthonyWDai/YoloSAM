@@ -190,7 +190,7 @@ def main():
         class_names=['pl'],
         
         # Training parameters
-        epochs=1000,
+        epochs=300,
         batch_size=args.batch_size,
         image_size=640,
         patience=50,

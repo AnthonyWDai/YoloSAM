@@ -164,6 +164,11 @@ def parse_args():
         default=YOLOConfig.learning_rate,
         help="Learning rate",
     )
+    parser.add_argument(
+        "--batch_size",
+        type=float,
+        default=YOLOConfig.batch_size,
+    )
 
     return parser.parse_args()
 
@@ -186,21 +191,19 @@ def main():
         
         # Training parameters
         epochs=1000,
-        batch_size=16,
+        batch_size=args.batch_size,
         image_size=640,
         patience=50,
         
         # Augmentation (optimized for medical scars)
-        mosaic=0.9,
+        mosaic=0.1,
         mixup=0.1,
-        copy_paste=0.4,
+        copy_paste=0.2,
         degrees=15.0,
-        hsv_v=0.3,
         
         # Detection parameters
         iou_threshold=0.2,
         conf_threshold=0.15,
-        max_detections=1,
 
         # Optimizer parameters
         learning_rate=args.learning_rate,

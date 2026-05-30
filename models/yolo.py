@@ -105,6 +105,7 @@ class YOLOModel:
             
             # Device
             'device': self.config.device,
+            'compile': self.config.compile,
         }
         
         # Update with any additional kwargs

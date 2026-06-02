@@ -1,24 +1,26 @@
 import os
 import random
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
+
 import numpy as np
 import torch
 from PIL import Image
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from ultralytics import YOLO
+
 from utils.config import SAMDatasetConfig
 from utils.prompt import BoxPromptGenerator, PointPromptGenerator
 from utils.z_score_norm import PercentileNormalize
 
 
 class SAMDataset(torch.utils.data.Dataset):
-    IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff')
+    IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff', '.npy')
+    MASK_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff', '.npy')
 
     def __init__(self, config: Union[Dict, SAMDatasetConfig]):
         self.config = config if isinstance(config, SAMDatasetConfig) else SAMDatasetConfig(**config)
 
-        # Prompt generators
         self.box_generator = BoxPromptGenerator(
             enable_direction_aug=self.config.enable_direction_aug,
             enable_size_aug=self.config.enable_size_aug,
@@ -52,7 +54,6 @@ class SAMDataset(torch.utils.data.Dataset):
                 ToTensorV2()
             ], additional_targets={'mask': 'mask'})
 
-        # Store samples as a list of dicts instead of parallel arrays
         self.samples: List[Dict[str, str]] = []
         self._load_dataset()
 
@@ -65,38 +66,148 @@ class SAMDataset(torch.utils.data.Dataset):
     def _is_image_file(self, filename: str) -> bool:
         return filename.lower().endswith(self.IMAGE_EXTENSIONS)
 
+    def _is_mask_file(self, filename: str) -> bool:
+        return filename.lower().endswith(self.MASK_EXTENSIONS)
+
+    def _get_stem(self, filename: str) -> str:
+        return os.path.splitext(filename)[0]
+
+    def _find_matching_mask(self, mask_dir: str, image_filename: str) -> Optional[str]:
+        """
+        Find a mask file with the same stem as image_filename in mask_dir,
+        regardless of extension.
+        Example:
+            image: a.npy -> mask can be a.png / a.jpg / a.npy
+        """
+        image_stem = self._get_stem(image_filename)
+
+        # First try exact filename
+        exact_path = os.path.join(mask_dir, image_filename)
+        if os.path.exists(exact_path):
+            return exact_path
+
+        # Then try same stem with any supported mask extension
+        for ext in self.MASK_EXTENSIONS:
+            candidate = os.path.join(mask_dir, image_stem + ext)
+            if os.path.exists(candidate):
+                return candidate
+
+        return None
+
+    def _load_npy(self, path: str) -> np.ndarray:
+        arr = np.load(path)
+        if isinstance(arr, np.lib.npyio.NpzFile):
+            raise ValueError(f"Expected .npy file but got .npz-like object: {path}")
+        return arr
+
+    def _load_image(self, path: str) -> np.ndarray:
+        """
+        Load image as HWC numpy array.
+        Supports standard image formats and .npy.
+
+        Expected .npy image shapes:
+        - H, W           -> converted to H, W, 3
+        - H, W, 1        -> converted to H, W, 3
+        - H, W, 3        -> kept
+        - 1, H, W        -> converted to H, W, 3
+        - 3, H, W        -> converted to H, W, 3
+        """
+        ext = os.path.splitext(path)[1].lower()
+
+        if ext == '.npy':
+            image = self._load_npy(path)
+
+            if image.ndim == 2:
+                image = np.stack([image] * 3, axis=-1)
+
+            elif image.ndim == 3:
+                # CHW -> HWC
+                if image.shape[0] in (1, 3) and image.shape[-1] not in (1, 3):
+                    image = np.transpose(image, (1, 2, 0))
+
+                if image.shape[-1] == 1:
+                    image = np.repeat(image, 3, axis=-1)
+                elif image.shape[-1] != 3:
+                    raise ValueError(f"Unsupported .npy image shape {image.shape} for {path}")
+            else:
+                raise ValueError(f"Unsupported .npy image ndim={image.ndim} for {path}")
+
+            image = np.asarray(image)
+
+            # Convert to uint8 if needed for augmentations / YOLO compatibility
+            if np.issubdtype(image.dtype, np.floating):
+                if image.max() <= 1.0:
+                    image = (image * 255).clip(0, 255).astype(np.uint8)
+                else:
+                    image = image.clip(0, 255).astype(np.uint8)
+            else:
+                image = image.clip(0, 255).astype(np.uint8)
+
+            return image
+
+        # Standard image files
+        return np.array(Image.open(path).convert('RGB'))
+
+    def _load_mask(self, path: str) -> np.ndarray:
+        """
+        Load mask as HW float32 binary array in {0,1}.
+        Supports standard image formats and .npy.
+
+        Expected .npy mask shapes:
+        - H, W
+        - H, W, 1
+        - 1, H, W
+        """
+        ext = os.path.splitext(path)[1].lower()
+
+        if ext == '.npy':
+            mask = self._load_npy(path)
+
+            if mask.ndim == 3:
+                if mask.shape[0] == 1 and mask.shape[-1] != 1:
+                    mask = mask[0]
+                elif mask.shape[-1] == 1:
+                    mask = mask[..., 0]
+                else:
+                    raise ValueError(f"Unsupported .npy mask shape {mask.shape} for {path}")
+            elif mask.ndim != 2:
+                raise ValueError(f"Unsupported .npy mask ndim={mask.ndim} for {path}")
+
+            mask = (mask > 0).astype(np.float32)
+            return mask
+
+        # Standard mask image files
+        mask = np.array(Image.open(path).convert('L'))
+        mask = (mask > 0).astype(np.float32)
+        return mask
+
     def _load_dataset(self):
         """
         Load dataset from dataset_path.
-
         Supports two structures:
-
         1) Flat file structure:
             images/
                 a.png
-                b.png
+                b.npy
             masks/
                 a.png
-                b.png
+                b.npy
 
         2) Image-folder structure:
             images/
                 case_001/
                     img1.png
-                    img2.png
+                    img2.npy
                 case_002/
                     img1.png
             masks/
                 case_001/
                     img1.png
-                    img2.png
+                    img2.npy
                 case_002/
                     img1.png
 
-        Notes:
-        - In flat structure, image_name = file stem or file name.
-        - In image-folder structure, image_name = subfolder name.
-        - Every image file must have a corresponding mask file.
+        Matching is done by file stem, not necessarily exact extension.
         """
         image_dir = os.path.join(self.config.dataset_path, 'images')
         mask_dir = os.path.join(self.config.dataset_path, 'masks')
@@ -121,16 +232,14 @@ class SAMDataset(torch.utils.data.Dataset):
             )
 
         samples = []
-        
+
         if has_subdirs:
-            # Image-folder style
             for folder_name in image_entries:
                 image_subdir = os.path.join(image_dir, folder_name)
                 mask_subdir = os.path.join(mask_dir, folder_name)
 
                 if not os.path.isdir(image_subdir):
                     continue
-
                 if not os.path.isdir(mask_subdir):
                     print(f"Mask subfolder not found for image folder: {folder_name}")
                     continue
@@ -138,32 +247,29 @@ class SAMDataset(torch.utils.data.Dataset):
                 for file_name in sorted(os.listdir(image_subdir)):
                     if not self._is_image_file(file_name):
                         continue
-                    
-                    # TODO: only support jpg image and png mask
-                    image_path = os.path.join(image_subdir, file_name)
-                    mask_path = os.path.join(mask_subdir, file_name).replace(".jpg", ".png")
 
-                    if os.path.exists(mask_path):
+                    image_path = os.path.join(image_subdir, file_name)
+                    mask_path = self._find_matching_mask(mask_subdir, file_name)
+
+                    if mask_path is not None:
                         samples.append({
                             'image_path': image_path,
                             'mask_path': mask_path,
-                            'image_name': folder_name,      # subfolder name as requested
+                            'image_name': folder_name,
                             'file_name': file_name
                         })
                     else:
                         print(f"Mask not found for {folder_name}/{file_name}")
 
         elif has_files:
-            # Flat file style
             for file_name in image_entries:
                 if not self._is_image_file(file_name):
                     continue
-                
-                # TODO: only support jpg image and png mask
-                image_path = os.path.join(image_dir, file_name)
-                mask_path = os.path.join(mask_dir, file_name).replace(".jpg", ".png")
 
-                if os.path.exists(mask_path):
+                image_path = os.path.join(image_dir, file_name)
+                mask_path = self._find_matching_mask(mask_dir, file_name)
+
+                if mask_path is not None:
                     samples.append({
                         'image_path': image_path,
                         'mask_path': mask_path,
@@ -172,6 +278,7 @@ class SAMDataset(torch.utils.data.Dataset):
                     })
                 else:
                     print(f"Mask not found for image: {file_name}")
+
         else:
             raise RuntimeError(f"No valid image files or subfolders found in {image_dir}")
 
@@ -191,8 +298,8 @@ class SAMDataset(torch.utils.data.Dataset):
         removed_count = 0
 
         for sample in self.samples:
-            mask = Image.open(sample['mask_path']).convert('L')
-            if np.array(mask).sum() >= 5:
+            mask = self._load_mask(sample['mask_path'])
+            if mask.sum() >= 5:
                 valid_samples.append(sample)
             else:
                 removed_count += 1
@@ -207,25 +314,22 @@ class SAMDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx: int) -> Dict[str, Any]:
         sample = self.samples[idx]
 
-        image = np.array(Image.open(sample['image_path']).convert('RGB'))
-        mask = np.array(Image.open(sample['mask_path']).convert('L'))
-        mask = (mask > 0).astype(np.float32)
+        image = self._load_image(sample['image_path'])
+        mask = self._load_mask(sample['mask_path'])
 
         transforms = self.train_transforms if self.config.train else self.val_transforms
 
-        # Retry a few times if augmentation makes mask empty
         for _ in range(5):
             transformed = transforms(image=image, mask=mask)
             image_t = transformed['image']
             mask_t = transformed['mask']
-            mask_np = mask_t.numpy()
+            mask_np = mask_t.cpu().numpy()
             if mask_np.sum() > 0:
                 break
         else:
-            # fallback to last transform result
             image_t = transformed['image']
             mask_t = transformed['mask']
-            mask_np = mask_t.numpy()
+            mask_np = mask_t.cpu().numpy()
 
         mask_t = mask_t.unsqueeze(0)
 
@@ -257,7 +361,6 @@ class SAMDataset(torch.utils.data.Dataset):
             else:
                 box = self.box_generator.generate(mask_np)
                 boxes = torch.tensor(box, dtype=torch.float32)
-
         else:
             if self.config.point_prompt:
                 points, labels = self.point_generator.generate(mask_np)
@@ -274,8 +377,8 @@ class SAMDataset(torch.utils.data.Dataset):
             'points_coords': points_coords,
             'points_labels': points_labels,
             'boxes': boxes,
-            'image_name': sample['image_name'],   # subfolder name in image-folder mode
-            'file_name': sample['file_name'],     # actual file name inside the subfolder
+            'image_name': sample['image_name'],
+            'file_name': sample['file_name'],
             'image_path': sample['image_path'],
             'mask_path': sample['mask_path'],
         }
@@ -305,3 +408,5 @@ if __name__ == "__main__":
     print(data['boxes'])
     print("image_name:", data['image_name'])
     print("file_name:", data['file_name'])
+    print("image_path:", data['image_path'])
+    print("mask_path:", data['mask_path'])

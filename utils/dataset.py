@@ -114,35 +114,41 @@ class SAMDataset(torch.utils.data.Dataset):
         """
         ext = os.path.splitext(path)[1].lower()
 
-        if ext == '.npy':
-            image = self._load_npy(path)
+        if ext == ".npy":
+            image = np.load(path)
 
             if image.ndim == 2:
-                image = np.stack([image] * 3, axis=-1)
-
+                pass
             elif image.ndim == 3:
-                # CHW -> HWC
-                if image.shape[0] in (1, 3) and image.shape[-1] not in (1, 3):
+                if image.shape[0] in [1, 3] and image.shape[-1] not in [1, 3]:
                     image = np.transpose(image, (1, 2, 0))
 
                 if image.shape[-1] == 1:
-                    image = np.repeat(image, 3, axis=-1)
-                elif image.shape[-1] != 3:
-                    raise ValueError(f"Unsupported .npy image shape {image.shape} for {path}")
-            else:
-                raise ValueError(f"Unsupported .npy image ndim={image.ndim} for {path}")
-
-            image = np.asarray(image)
-
-            # Convert to uint8 if needed for augmentations / YOLO compatibility
-            if np.issubdtype(image.dtype, np.floating):
-                if image.max() <= 1.0:
-                    image = (image * 255).clip(0, 255).astype(np.uint8)
+                    image = image[..., 0]
+                elif image.shape[-1] == 3:
+                    image = image.astype(np.float32)
+                    lo, hi = np.percentile(image, [1, 99])
+                    if hi > lo:
+                        image = np.clip(image, lo, hi)
+                        image = (image - lo) / (hi - lo)
+                    else:
+                        image = np.zeros_like(image, dtype=np.float32)
+                    return (image * 255).astype(np.uint8)
                 else:
-                    image = image.clip(0, 255).astype(np.uint8)
+                    raise ValueError(f"Unsupported channel dimension in .npy image shape {image.shape} for file: {path}")
             else:
-                image = image.clip(0, 255).astype(np.uint8)
+                raise ValueError(f"Unsupported .npy image shape {image.shape} for file: {path}")
 
+            image = image.astype(np.float32)
+            lo, hi = np.percentile(image, [1, 99])
+            if hi > lo:
+                image = np.clip(image, lo, hi)
+                image = (image - lo) / (hi - lo)
+            else:
+                image = np.zeros_like(image, dtype=np.float32)
+
+            image = (image * 255).astype(np.uint8)
+            image = np.stack([image] * 3, axis=-1)
             return image
 
         # Standard image files

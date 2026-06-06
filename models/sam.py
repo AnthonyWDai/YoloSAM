@@ -7,6 +7,7 @@ from typing import Tuple, Optional, Dict
 
 from utils.config import SAMFinetuneConfig
 
+
 class SAMModel(nn.Module):
     def __init__(self, config: SAMFinetuneConfig):
         super().__init__()

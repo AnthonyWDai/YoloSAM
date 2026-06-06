@@ -82,9 +82,9 @@ class TrainSAM:
         
         # metrics
         self.dice_metric = DiceMetric(
-            include_background=True, 
+            include_background=False, 
             reduction="mean"
-            )
+        )
         
     def init_wandb(self):
         """Initialize Weights & Biases logging"""

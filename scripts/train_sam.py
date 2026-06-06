@@ -25,8 +25,9 @@ class TrainSAM:
         self.device = torch.device(config.device)
 
         self.output_dir = self.config.output_path
-        self.output_dir = "%s/Fr%d_Lr%f" % (
-            self.output_dir, self.config.freeze, self.config.learning_rate,
+        self.output_dir = "%s/Bs%d_Lr%f_Fr%d" % (
+            self.output_dir, self.config.batch_size, 
+            self.config.learning_rate, self.config.freeze, 
         )
 
         self.run_number = 0

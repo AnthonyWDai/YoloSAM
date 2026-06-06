@@ -293,9 +293,10 @@ def parse_args():
     parser.add_argument("--sam_path", type=str, default="facebook/sam-vit-base")
     parser.add_argument("--output_path", type=str, default="./output")
     parser.add_argument("--dataset_path", type=str, default="./data")
-    parser.add_argument("--freeze", type=int, default=1)
+    parser.add_argument("--num_epochs", type=int, default=50)
     parser.add_argument("--batch_size", type=int, default=2)
     parser.add_argument("--learning_rate", type=float, default=1e-4)
+    parser.add_argument("--freeze", type=int, default=1)
 
     return parser.parse_args()
 
@@ -311,7 +312,7 @@ def main():
         sam_path=args.sam_path,
         output_path=args.output_path,
         freeze=args.freeze,
-        num_epochs=50,
+        num_epochs=args.num_epochs,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
         weight_decay=1e-4,

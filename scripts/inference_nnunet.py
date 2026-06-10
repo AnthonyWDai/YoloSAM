@@ -215,7 +215,7 @@ class YoloSAMInference:
                 'confidence': detection['confidence'],
                 'class': detection['class'],
                 'class_name': detection['class_name'],
-                'iou_prediction': float(iou_pred[0].detach().cpu().numpy())
+                'iou_prediction': iou_pred[0].detach().cpu().item()
             })
 
         return results

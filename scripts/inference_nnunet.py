@@ -21,7 +21,8 @@ from nnunetv2.utilities.label_handling.label_handling import determine_num_input
 from nnunetv2.inference.export_prediction import export_prediction_from_logits
 from nnunetv2.utilities.find_class_by_name import recursive_find_python_class
 
-from batchgenerators.utilities.file_and_folder_operations import maybe_mkdir_p
+from batchgenerators.utilities.file_and_folder_operations import load_json, join, isfile, maybe_mkdir_p, isdir, subdirs, \
+    save_json
 
 
 class YoloSAMInference:
@@ -59,21 +60,19 @@ class YoloSAMInference:
         self.plans = load_json(plans_json_path)
         self.plans_manager = PlansManager(self.plans)
 
-        # Choose configuration name from plans if user provided one in config
         if hasattr(config, "nnunet_configuration") and config.nnunet_configuration is not None:
             self.configuration_name = config.nnunet_configuration
         else:
-            # fallback to common default
             self.configuration_name = "3d_fullres"
 
         self.configuration_manager = self.plans_manager.get_configuration(self.configuration_name)
 
-        # reader/writer from dataset.json
-        io_class = determine_reader_writer_from_dataset_json(
-            self.dataset_json,
-            self.plans_manager
-        )
-        self.reader_writer = io_class()
+        # # reader/writer from dataset.json
+        # io_class = determine_reader_writer_from_dataset_json(
+        #     self.dataset_json,
+        #     self.plans_manager
+        # )
+        # self.reader_writer = io_class()
 
         # preprocessor
         self.preprocessor = self.configuration_manager.preprocessor_class(verbose=False)
@@ -96,8 +95,8 @@ class YoloSAMInference:
         # Initialize SAM
         # ---------------------------
         self.sam_config = SAMFinetuneConfig(
-            sam_path=config.sam_checkpoint_path,
-            checkpoint_path=None,
+            sam_path=None,
+            checkpoint_path=config.sam_checkpoint_path,
             model_type="vit_b",
             device=self.device
         )
@@ -141,31 +140,13 @@ class YoloSAMInference:
         self,
         input_files: List[str],
         seg_prev_stage: Optional[str] = None
-    ) -> Tuple[np.ndarray, dict]:
-        """
-        Run nnU-Net preprocessing for a single case.
-
-        Parameters
-        ----------
-        input_files : List[str]
-            Example:
-            [
-                ".../case_001_0000.nii.gz",
-                ".../case_001_0001.nii.gz"
-            ]
-        seg_prev_stage : Optional[str]
-            Optional cascade segmentation input.
-
-        Returns
-        -------
-        data : np.ndarray
-            Preprocessed nnU-Net data, shape usually [C, X, Y, Z]
-        data_properties : dict
-            nnU-Net properties needed for exporting back.
-        """
+    ):
         data, seg, data_properties = self.preprocessor.run_case(
             input_files,
-            seg_prev_stage
+            seg_prev_stage,
+            self.plans_manager,
+            self.configuration_manager,
+            self.dataset_json
         )
         return data, data_properties
 
@@ -568,6 +549,5 @@ if __name__ == "__main__":
     # --plans_json /path/to/plans.json \
     # --yolo_checkpoint runs/yolo_scar_detection2/weights/best.pt \
     # --sam_checkpoint checkpoints/sam_vit_b_01ec64.pth \
-    # --device cuda \
-    # --save_slices
+    # --device cuda
     main()

@@ -47,16 +47,16 @@ class SAMModel(nn.Module):
         
     def load_model(self):
         """Load SAM model from checkpoint."""
-        if not os.path.exists(self.config.sam_path):
-            raise FileNotFoundError(f"SAM model checkpoint not found at {self.config.sam_path}, Please run `python download_sam.py` to download the base model.")
+        if self.config.sam_path is None or not os.path.exists(self.config.sam_path):
+            print(f"SAM model checkpoint not found at {self.config.sam_path}, Please run `python download_sam.py` to download the base model.")
             
         sam = sam_model_registry[self.config.model_type](checkpoint=self.config.sam_path)
         print("Load SAM model from ", self.config.sam_path)
         sam.to(self.device)
         if self.config.checkpoint_path:
-            checkpoint = torch.load(self.config.checkpoint_path, map_location=self.device)
+            checkpoint = torch.load(self.config.checkpoint_path, map_location=self.device, weights_only=False)
             sam.load_state_dict(checkpoint['model_state_dict'])
-            print("Loaded checkpoint")
+            print("Loaded sam checkpoint")
         return sam
     
     def forward_one_image(

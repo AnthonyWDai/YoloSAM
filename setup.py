@@ -15,6 +15,7 @@ setup(
         "monai",
         "tqdm",
         "ultralytics",
+        "nnunetv2",
     ],
     python_requires=">=3.8",
 )

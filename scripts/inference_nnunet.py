@@ -135,6 +135,39 @@ class YoloSAMInference:
 
         rgb = np.stack([ch0, ch1, ch2], axis=-1)
         return rgb
+    
+    # TODO: change to new training scheme
+    # def _slice_to_rgb(self, slice_2ch: np.ndarray) -> np.ndarray:
+    #     """
+    #     Convert a 2-channel slice [2, H, W] into RGB [H, W, 3]:
+    #     R = channel 0 normalized to uint8 using its own range
+    #     G = channel 1 mapped into channel 0's value range, then normalized to uint8
+    #     B = average(R, G)
+    #     """
+    #     assert slice_2ch.ndim == 3 and slice_2ch.shape[0] == 2, \
+    #         f"Expected slice shape [2, H, W], got {slice_2ch.shape}"
+
+    #     src0 = slice_2ch[0].astype(np.float32)
+    #     src1 = slice_2ch[1].astype(np.float32)
+
+    #     # Normalize channel 0 using its own range
+    #     min0, max0 = src0.min(), src0.max()
+    #     if max0 > min0:
+    #         ch0 = ((src0 - min0) / (max0 - min0) * 255.0).clip(0, 255).astype(np.uint8)
+    #     else:
+    #         ch0 = np.zeros_like(src0, dtype=np.uint8)
+
+    #     # Map channel 1 into channel 0's value range, then normalize with channel 0 range
+    #     min1, max1 = src1.min(), src1.max()
+    #     if max1 > min1 and max0 > min0:
+    #         src1_mapped = (src1 - min1) / (max1 - min1) * (max0 - min0) + min0
+    #         ch1 = ((src1_mapped - min0) / (max0 - min0) * 255.0).clip(0, 255).astype(np.uint8)
+    #     else:
+    #         ch1 = np.zeros_like(src1, dtype=np.uint8)
+
+    #     ch2 = ((ch0.astype(np.float32) + ch1.astype(np.float32)) / 2.0).astype(np.uint8)
+    #     rgb = np.stack([ch0, ch1, ch2], axis=-1)
+    #     return rgb
 
     def preprocess_case_with_nnunet(
         self,
@@ -490,15 +523,15 @@ def main():
         help="Save probabilities if supported by export"
     )
     parser.add_argument(
-        "--yolo_conf", type=float, default=0.25,
+        "--yolo_conf", type=float, default=0.15,
         help="YOLO confidence threshold"
     )
     parser.add_argument(
-        "--yolo_iou", type=float, default=0.45,
+        "--yolo_iou", type=float, default=0.2,
         help="YOLO IoU threshold"
     )
     parser.add_argument(
-        "--yolo_max_det", type=int, default=100,
+        "--yolo_max_det", type=int, default=30,
         help="YOLO max detections per slice"
     )
     parser.add_argument(

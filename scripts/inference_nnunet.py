@@ -95,7 +95,7 @@ class YoloSAMInference:
         # Initialize SAM
         # ---------------------------
         self.sam_config = SAMFinetuneConfig(
-            sam_path=None,
+            sam_path=config.sam_path,
             checkpoint_path=config.sam_checkpoint_path,
             model_type="vit_b",
             device=self.device
@@ -501,6 +501,10 @@ def main():
     parser.add_argument(
         "--yolo_checkpoint", type=str, required=True,
         help="Path to YOLO checkpoint"
+    )
+    parser.add_argument(
+        "--sam_path", type=str, required=True,
+        help="Path to SAM checkpoint"
     )
     parser.add_argument(
         "--sam_checkpoint", type=str, required=True,

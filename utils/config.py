@@ -152,6 +152,7 @@ class YOLOConfig:
     
 @dataclass
 class YoloSAMInferenceConfig:
+    sam_path: str = "checkpoints/sam_vit_b_01ec64.pth"
     yolo_checkpoint_path: str = "checkpoints/yolo11n.pt"
     sam_checkpoint_path: str = "checkpoints/sam_vit_b_01ec64.pth"
     device: str = "cpu"

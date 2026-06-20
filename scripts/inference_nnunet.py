@@ -503,11 +503,11 @@ def main():
         help="Path to YOLO checkpoint"
     )
     parser.add_argument(
-        "--sam_path", type=str, required=True,
+        "--sam_path", type=str, default=None,
         help="Path to SAM checkpoint"
     )
     parser.add_argument(
-        "--sam_checkpoint", type=str, required=True,
+        "--sam_checkpoint", type=str, default=None,
         help="Path to SAM checkpoint"
     )
     parser.add_argument(

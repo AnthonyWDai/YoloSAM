@@ -548,6 +548,7 @@ def main():
     maybe_mkdir_p(args.o)
 
     config = YoloSAMInferenceConfig(
+        sam_path=args.sam_path,
         yolo_checkpoint_path=args.yolo_checkpoint,
         sam_checkpoint_path=args.sam_checkpoint,
         device=args.device,

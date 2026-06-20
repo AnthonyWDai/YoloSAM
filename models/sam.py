@@ -78,17 +78,16 @@ class SAMModel(nn.Module):
         image_embedding = self.image_encoder(image)
             
         # Prepare prompts 
-        with torch.no_grad():
-            box = self._prepare_box(bounding_box) if bounding_box is not None else None
-            pts = self._prepare_points(points) if points is not None else None
-            # print("point_coords.shape: ", pts[0].shape)
-            # print("point_labels.shape: ", pts[1].shape)
-            # print("box.shape: ", box.shape)
-            sparse_embeddings, dense_embeddings = self.prompt_encoder(
-                points=pts,
-                boxes=box,
-                masks=None,
-            )
+        box = self._prepare_box(bounding_box) if bounding_box is not None else None
+        pts = self._prepare_points(points) if points is not None else None
+        # print("point_coords.shape: ", pts[0].shape)
+        # print("point_labels.shape: ", pts[1].shape)
+        # print("box.shape: ", box.shape)
+        sparse_embeddings, dense_embeddings = self.prompt_encoder(
+            points=pts,
+            boxes=box,
+            masks=None,
+        )
             
         low_res_masks, iou_prediction = self.mask_decoder(
             image_embeddings=image_embedding,

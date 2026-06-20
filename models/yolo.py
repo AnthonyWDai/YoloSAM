@@ -28,8 +28,8 @@ class YOLOModel:
             print(f"Loading YOLO model from checkpoint: {self.config.checkpoint_path}")
             self.model = YOLO(self.config.checkpoint_path)
         else:
-            print(f"Loading pretrained YOLO model: {self.config.model_type}")
-            self.model = YOLO(f'{self.config.model_type}.pt')
+            print(f"Loading pretrained YOLO model: {self.config.pretrained_path}")
+            self.model = YOLO(self.config.pretrained_path)
     
     def create_dataset_yaml(self):
         """Create the dataset configuration file for YOLO training."""

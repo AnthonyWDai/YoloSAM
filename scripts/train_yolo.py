@@ -153,6 +153,12 @@ def parse_args():
         help="Path to pretrained checkpoint",
     )
     parser.add_argument(
+        "--pretrained_path",
+        type=str,
+        default=YOLOConfig.pretrained_path,
+        help="Path to pretrained checkpoint",
+    )
+    parser.add_argument(
         "--output_path",
         type=str,
         default=YOLOConfig.output_path,
@@ -181,6 +187,7 @@ def main():
     config = YOLOConfig(
         # Model settings
         model_type=args.model_type,
+        pretrained_path=args.pretrained_path,
         device="cuda",
         output_path=args.output_path,
         

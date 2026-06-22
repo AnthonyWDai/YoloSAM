@@ -2,6 +2,8 @@ import os
 import random
 from typing import Any, Dict, List, Optional, Union
 
+
+import cv2
 import numpy as np
 import torch
 from PIL import Image
@@ -33,20 +35,81 @@ class SAMDataset(torch.utils.data.Dataset):
 
         if self.config.train:
             self.train_transforms = A.Compose([
-                A.RandomGamma(gamma_limit=self.config.gamma_limit, p=self.config.gamma_prob),
-                A.Rotate(limit=self.config.rotate_limit, p=self.config.rotate_prob),
-                A.RandomScale(scale_limit=self.config.scale_limit, p=self.config.scale_prob),
+                # Intensity augmentation: usually safe for small lesion detection
+                A.RandomGamma(
+                    gamma_limit=self.config.gamma_limit,
+                    p=self.config.gamma_prob
+                ),
+                A.OneOf([
+                    A.RandomBrightnessContrast(
+                        brightness_limit=0.1,
+                        contrast_limit=0.1,
+                        p=1.0
+                    ),
+                    A.CLAHE(
+                        clip_limit=(1, 2),
+                        tile_grid_size=(8, 8),
+                        p=1.0
+                    ),
+                ], p=0.3),
+
+                # Mild geometric transforms only
+                A.Rotate(
+                    limit=min(self.config.rotate_limit, 10),
+                    interpolation=cv2.INTER_LINEAR,
+                    mask_interpolation=cv2.INTER_NEAREST,
+                    border_mode=cv2.BORDER_CONSTANT,
+                    p=self.config.rotate_prob
+                ),
+
+                # Avoid strong shrinking of tiny lesions
+                A.Affine(
+                    scale=(0.95, 1.05),   # mild only
+                    translate_percent=(-0.02, 0.02),
+                    rotate=0,
+                    shear=0,
+                    interpolation=cv2.INTER_LINEAR,
+                    mask_interpolation=cv2.INTER_NEAREST,
+                    mode=cv2.BORDER_CONSTANT,
+                    p=self.config.scale_prob
+                ),
+
+                # Only keep if left-right flip is anatomically acceptable
                 A.HorizontalFlip(p=self.config.horizontal_flip_prob),
-                A.Resize(self.config.image_size, self.config.image_size),
+
+                # Prefer aspect-ratio-preserving resize + pad for whole-body imaging
+                A.LongestMaxSize(
+                    max_size=self.config.image_size,
+                    interpolation=cv2.INTER_LINEAR
+                ),
+                A.PadIfNeeded(
+                    min_height=self.config.image_size,
+                    min_width=self.config.image_size,
+                    border_mode=cv2.BORDER_CONSTANT,
+                    value=0,
+                    mask_value=0
+                ),
+
                 PercentileNormalize(
                     lower_percentile=self.config.percentiles[0],
                     upper_percentile=self.config.percentiles[1]
                 ),
                 ToTensorV2()
             ], additional_targets={'mask': 'mask'})
+
         else:
             self.val_transforms = A.Compose([
-                A.Resize(self.config.image_size, self.config.image_size),
+                A.LongestMaxSize(
+                    max_size=self.config.image_size,
+                    interpolation=cv2.INTER_LINEAR
+                ),
+                A.PadIfNeeded(
+                    min_height=self.config.image_size,
+                    min_width=self.config.image_size,
+                    border_mode=cv2.BORDER_CONSTANT,
+                    value=0,
+                    mask_value=0
+                ),
                 PercentileNormalize(
                     lower_percentile=self.config.percentiles[0],
                     upper_percentile=self.config.percentiles[1]

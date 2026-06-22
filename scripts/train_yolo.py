@@ -199,18 +199,20 @@ def main():
         # Training parameters
         epochs=300,
         batch_size=args.batch_size,
-        image_size=640,
+        image_size=640, # 960, 1024
         patience=50,
         
         # Augmentation (optimized for medical scars)
-        mosaic=0.1,
-        mixup=0.1,
-        copy_paste=0.2,
-        degrees=15.0,
+        mosaic=0.05,      # or 0.0 if anatomy becomes unrealistic
+        mixup=0.0,        # often not ideal for medical lesion detection
+        copy_paste=0.1,   # only if masks/boxes are accurate and pasted lesions stay realistic
+        degrees=5.0,      # reduce geometric distortion
+        flipud=0.0,       # usually avoid unless anatomically valid
+        fliplr=0.5,       # acceptable in many whole-body setups, task-dependent
         
         # Detection parameters
-        iou_threshold=0.2,
-        conf_threshold=0.15,
+        iou_threshold=0.3,
+        conf_threshold=0.05,
 
         # Optimizer parameters
         learning_rate=args.learning_rate,

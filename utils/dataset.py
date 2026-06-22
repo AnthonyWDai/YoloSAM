@@ -70,7 +70,8 @@ class SAMDataset(torch.utils.data.Dataset):
                     shear=0,
                     interpolation=cv2.INTER_LINEAR,
                     mask_interpolation=cv2.INTER_NEAREST,
-                    mode=cv2.BORDER_CONSTANT,
+                    border_mode=cv2.BORDER_CONSTANT,
+                    fill=0,
                     p=self.config.scale_prob
                 ),
 
@@ -86,8 +87,8 @@ class SAMDataset(torch.utils.data.Dataset):
                     min_height=self.config.image_size,
                     min_width=self.config.image_size,
                     border_mode=cv2.BORDER_CONSTANT,
-                    value=0,
-                    mask_value=0
+                    fill=0,
+                    fill_mask=0
                 ),
 
                 PercentileNormalize(
@@ -107,8 +108,8 @@ class SAMDataset(torch.utils.data.Dataset):
                     min_height=self.config.image_size,
                     min_width=self.config.image_size,
                     border_mode=cv2.BORDER_CONSTANT,
-                    value=0,
-                    mask_value=0
+                    fill=0,
+                    fill_mask=0
                 ),
                 PercentileNormalize(
                     lower_percentile=self.config.percentiles[0],

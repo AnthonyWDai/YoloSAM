@@ -175,6 +175,11 @@ def parse_args():
         type=int,
         default=YOLOConfig.batch_size,
     )
+    parser.add_argument(
+        "--image_size",
+        type=int,
+        default=640, # 960, 1024
+    )
 
     return parser.parse_args()
 
@@ -199,7 +204,7 @@ def main():
         # Training parameters
         epochs=300,
         batch_size=args.batch_size,
-        image_size=640, # 960, 1024
+        image_size=args.image_size, # 960, 1024
         patience=50,
         
         # Augmentation (optimized for medical scars)

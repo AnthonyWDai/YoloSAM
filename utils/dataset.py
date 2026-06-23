@@ -246,7 +246,7 @@ class SAMDataset(torch.utils.data.Dataset):
             return mask
 
         # Standard mask image files
-        mask = np.array(Image.open(path).convert('L'))
+        mask = np.array(Image.open(path))
         mask = (mask > 0).astype(np.float32)
         return mask
 

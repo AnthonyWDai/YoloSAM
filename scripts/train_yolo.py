@@ -214,6 +214,12 @@ def main():
         degrees=5.0,      # reduce geometric distortion
         flipud=0.0,       # usually avoid unless anatomically valid
         fliplr=0.5,       # acceptable in many whole-body setups, task-dependent
+        hsv_h=0.0,
+        hsv_s=0.0,
+        hsv_v=0.0,
+        translate=0.01,
+        scale=0.02,
+        erasing=0.0,
         
         # Detection parameters
         iou_threshold=0.3,

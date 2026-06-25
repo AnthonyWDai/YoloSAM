@@ -55,7 +55,7 @@ class SAMDataset(torch.utils.data.Dataset):
                 # Mild geometric transforms only
                 A.Rotate(
                     limit=min(self.config.rotate_limit, 10),
-                    interpolation=cv2.INTER_LINEAR,
+                    interpolation=cv2.INTER_CUBIC,
                     mask_interpolation=cv2.INTER_NEAREST,
                     border_mode=cv2.BORDER_CONSTANT,
                     p=self.config.rotate_prob
@@ -67,7 +67,7 @@ class SAMDataset(torch.utils.data.Dataset):
                     translate_percent=(-0.02, 0.02),
                     rotate=0,
                     shear=0,
-                    interpolation=cv2.INTER_LINEAR,
+                    interpolation=cv2.INTER_CUBIC,
                     mask_interpolation=cv2.INTER_NEAREST,
                     border_mode=cv2.BORDER_CONSTANT,
                     fill=0,
@@ -80,7 +80,7 @@ class SAMDataset(torch.utils.data.Dataset):
                 # Prefer aspect-ratio-preserving resize + pad for whole-body imaging
                 A.LongestMaxSize(
                     max_size=self.config.image_size,
-                    interpolation=cv2.INTER_LINEAR
+                    interpolation=cv2.INTER_CUBIC
                 ),
                 A.PadIfNeeded(
                     min_height=self.config.image_size,
@@ -101,7 +101,7 @@ class SAMDataset(torch.utils.data.Dataset):
             self.val_transforms = A.Compose([
                 A.LongestMaxSize(
                     max_size=self.config.image_size,
-                    interpolation=cv2.INTER_LINEAR
+                    interpolation=cv2.INTER_CUBIC
                 ),
                 A.PadIfNeeded(
                     min_height=self.config.image_size,

@@ -129,6 +129,7 @@ class YOLOConfig:
     hsv_h: float = 0.0
     hsv_s: float = 0.0
     hsv_v: float = 0.0
+    erasing: float = 0.0,
     
     # Optimizer parameters
     learning_rate: float = 0.001

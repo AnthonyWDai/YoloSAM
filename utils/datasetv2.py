@@ -34,23 +34,11 @@ class SAMDataset(torch.utils.data.Dataset):
 
         if self.config.train:
             self.train_transforms = A.Compose([
-                # Intensity augmentation: usually safe for small lesion detection
-                A.RandomGamma(
-                    gamma_limit=self.config.gamma_limit,
-                    p=self.config.gamma_prob
+                # Prefer aspect-ratio-preserving resize + pad for whole-body imaging
+                A.LongestMaxSize(
+                    max_size=self.config.image_size,
+                    interpolation=cv2.INTER_CUBIC
                 ),
-                A.OneOf([
-                    A.RandomBrightnessContrast(
-                        brightness_limit=0.1,
-                        contrast_limit=0.1,
-                        p=1.0
-                    ),
-                    A.CLAHE(
-                        clip_limit=(1, 2),
-                        tile_grid_size=(8, 8),
-                        p=1.0
-                    ),
-                ], p=0.3),
 
                 # Mild geometric transforms only
                 A.Rotate(
@@ -78,11 +66,6 @@ class SAMDataset(torch.utils.data.Dataset):
                 A.HorizontalFlip(p=self.config.flip_prob),
                 A.VerticalFlip(p=self.config.flip_prob),
 
-                # Prefer aspect-ratio-preserving resize + pad for whole-body imaging
-                A.LongestMaxSize(
-                    max_size=self.config.image_size,
-                    interpolation=cv2.INTER_CUBIC
-                ),
                 A.PadIfNeeded(
                     min_height=self.config.image_size,
                     min_width=self.config.image_size,
@@ -90,6 +73,24 @@ class SAMDataset(torch.utils.data.Dataset):
                     fill=0,
                     fill_mask=0
                 ),
+
+                # Intensity augmentation: usually safe for small lesion detection
+                A.RandomGamma(
+                    gamma_limit=self.config.gamma_limit,
+                    p=self.config.gamma_prob
+                ),
+                A.OneOf([
+                    A.RandomBrightnessContrast(
+                        brightness_limit=0.1,
+                        contrast_limit=0.1,
+                        p=1.0
+                    ),
+                    A.CLAHE(
+                        clip_limit=(1, 2),
+                        tile_grid_size=(8, 8),
+                        p=1.0
+                    ),
+                ], p=0.3),
 
                 PercentileNormalize(
                     lower_percentile=self.config.percentiles[0],

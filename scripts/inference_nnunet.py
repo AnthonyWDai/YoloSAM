@@ -25,6 +25,7 @@ from batchgenerators.utilities.file_and_folder_operations import load_json, join
     save_json
 
 
+# TODO: slicing aided hyper inference (SAHI)
 class YoloSAMInference:
     def __init__(
         self,

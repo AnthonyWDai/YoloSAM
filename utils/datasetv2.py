@@ -37,7 +37,8 @@ class SAMDataset(torch.utils.data.Dataset):
                 # Prefer aspect-ratio-preserving resize + pad for whole-body imaging
                 A.LongestMaxSize(
                     max_size=self.config.image_size,
-                    interpolation=cv2.INTER_CUBIC
+                    interpolation=cv2.INTER_CUBIC,
+                    mask_interpolation=cv2.INTER_NEAREST,
                 ),
 
                 # Mild geometric transforms only
@@ -103,7 +104,8 @@ class SAMDataset(torch.utils.data.Dataset):
             self.val_transforms = A.Compose([
                 A.LongestMaxSize(
                     max_size=self.config.image_size,
-                    interpolation=cv2.INTER_CUBIC
+                    interpolation=cv2.INTER_CUBIC,
+                    mask_interpolation=cv2.INTER_NEAREST,
                 ),
                 A.PadIfNeeded(
                     min_height=self.config.image_size,

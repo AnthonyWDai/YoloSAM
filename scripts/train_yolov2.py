@@ -218,13 +218,19 @@ def main():
         hsv_s=0.0,
         hsv_v=0.0,
         translate=0.05,
-        scale=0.1,
+        scale=0.05,
         erasing=0.0,
         
         # Detection parameters
         iou_threshold=0.2,
         conf_threshold=0.05,
+        max_detections=30,
 
+        # Training settings
+        multi_scale=False,
+        test_time_augmentation=False,
+        save_period=50,
+    
         # Optimizer parameters
         learning_rate=args.learning_rate,
         

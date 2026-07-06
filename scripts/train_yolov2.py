@@ -190,6 +190,8 @@ def main():
     args = parse_args()
 
     config = YOLOConfig(
+        compile=True,
+
         # Model settings
         model_type=args.model_type,
         pretrained_path=args.pretrained_path,

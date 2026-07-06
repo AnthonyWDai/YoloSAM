@@ -106,8 +106,6 @@ class YOLOModel:
             # Device
             "device": self.config.device,
             "compile": self.config.compile,
-
-            "drop_last": True,
         }
         
         # Update with any additional kwargs

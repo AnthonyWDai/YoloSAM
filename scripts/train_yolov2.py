@@ -224,11 +224,11 @@ def main():
         # Detection parameters
         iou_threshold=0.2,
         conf_threshold=0.05,
-        max_detections=30,
+        max_detections=50,
 
         # Training settings
-        multi_scale=False,
-        test_time_augmentation=False,
+        multi_scale=True,
+        test_time_augmentation=True,
         save_period=50,
     
         # Optimizer parameters

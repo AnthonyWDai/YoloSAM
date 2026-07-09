@@ -190,7 +190,7 @@ def main():
     args = parse_args()
 
     config = YOLOConfig(
-        compile=True,
+        compile=False,
 
         # Model settings
         model_type=args.model_type,
@@ -226,7 +226,7 @@ def main():
         # Detection parameters
         iou_threshold=0.2,
         conf_threshold=0.05,
-        max_detections=50,
+        max_detections=30,
 
         # Training settings
         multi_scale=True,

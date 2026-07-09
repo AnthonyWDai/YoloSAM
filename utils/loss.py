@@ -7,7 +7,6 @@ import numpy as np
 from typing import Optional
 from scipy.ndimage import gaussian_filter
 
-
 from utils.config import SAMFinetuneConfig
 
 

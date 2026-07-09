@@ -240,6 +240,13 @@ class TrainSAM:
 
             self.optimizer.zero_grad(set_to_none=True)
             loss.backward()
+
+            if getattr(self.config, "grad_clip", 0.0) and self.config.grad_clip > 0:
+                torch.nn.utils.clip_grad_norm_(
+                    self.model.parameters(),
+                    max_norm=self.config.grad_clip,
+                )
+
             self.optimizer.step()
 
             epoch_loss += loss.item()
@@ -347,6 +354,7 @@ def parse_args():
     parser.add_argument("--learning_rate", type=float, default=1e-4)
     parser.add_argument("--freeze", type=int, default=1)
     parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument("--grad_clip", type=float, default=0.0)
     return parser.parse_args()
 
 
@@ -370,6 +378,7 @@ def main():
         sigma=1,
         wandb_mode="disabled",
         num_workers=0,
+        grad_clip=args.grad_clip,
     )
 
     train_dataset_config = SAMDatasetConfig(

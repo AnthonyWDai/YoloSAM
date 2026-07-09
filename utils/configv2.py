@@ -32,6 +32,8 @@ class SAMFinetuneConfig:
     wandb_project: str = "SAM-finetune"
     wandb_name: str = "test"
     wandb_mode: str = "disabled"
+
+    grad_clip_norm: float = 10
     
     
 @dataclass

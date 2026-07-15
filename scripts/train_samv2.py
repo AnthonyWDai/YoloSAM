@@ -107,10 +107,38 @@ class TrainSAM:
             weight_decay=config.weight_decay,
         )
 
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            self.optimizer,
-            T_max=config.num_epochs,
-        )
+        self.total_steps = config.num_epochs * max(len(self.train_loader), 1)
+        self.warmup_steps = getattr(config, "warmup_epochs", 0) * max(len(self.train_loader), 1)
+
+        base_lr = config.learning_rate
+        min_lr = getattr(config, "min_lr", base_lr * 1e-3)
+        warmup_lr = getattr(config, "warmup_lr", min_lr * 10)
+
+        if self.warmup_steps > 0:
+            for param_group in self.optimizer.param_groups:
+                param_group["lr"] = warmup_lr
+
+        def lr_lambda(current_step):
+            if self.total_steps <= 0:
+                return 1.0
+
+            if self.warmup_steps > 0 and current_step < self.warmup_steps:
+                alpha = current_step / max(self.warmup_steps, 1)
+                current_lr = warmup_lr + alpha * (base_lr - warmup_lr)
+                return current_lr / base_lr
+
+            cosine_steps = self.total_steps - self.warmup_steps
+            if cosine_steps <= 0:
+                return 1.0
+
+            progress = (current_step - self.warmup_steps) / max(cosine_steps, 1)
+            progress = min(max(progress, 0.0), 1.0)
+
+            cosine_decay = 0.5 * (1.0 + math.cos(math.pi * progress))
+            current_lr = min_lr + (base_lr - min_lr) * cosine_decay
+            return current_lr / base_lr
+
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lr_lambda)
 
         self.current_epoch = 0
         self.best_val_dice = 0.0
@@ -248,6 +276,7 @@ class TrainSAM:
                 )
 
             self.optimizer.step()
+            self.scheduler.step()
 
             epoch_loss += loss.item()
             running_dice = dice_sum_total / max(dice_valid_total, 1)
@@ -333,7 +362,7 @@ class TrainSAM:
             val_loss, val_dice = self.validate()
             print(f"Epoch {epoch}: Validation Loss = {val_loss:.4f}, Validation Dice = {val_dice:.4f}")
 
-            self.scheduler.step()
+            # self.scheduler.step()
 
             is_best = val_dice > self.best_val_dice
             if is_best:
@@ -355,6 +384,9 @@ def parse_args():
     parser.add_argument("--freeze", type=int, default=1)
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--grad_clip", type=float, default=0.0)
+    parser.add_argument("--warmup_epochs", type=int, default=0)
+    parser.add_argument("--warmup_lr", type=float, default=1e-6)
+    parser.add_argument("--min_lr", type=float, default=0.0)
     return parser.parse_args()
 
 
@@ -379,6 +411,9 @@ def main():
         wandb_mode="disabled",
         num_workers=0,
         grad_clip=args.grad_clip,
+        warmup_epochs=args.warmup_epochs,
+        warmup_lr=args.warmup_lr,
+        min_lr=args.min_lr,
     )
 
     train_dataset_config = SAMDatasetConfig(

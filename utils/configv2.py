@@ -18,6 +18,10 @@ class SAMFinetuneConfig:
     freeze: int = 0
     batch_size: int = 2
     num_epochs: int = 100
+    warmup_epochs: int = 10
+    warmup_lr: float = None
+    min_lr: float = None
+
     
     # loss Dice + BCE + KL divergence -> Dice = 1 - BCE - KL
     lambda_bce: float = 0.2 # for BCE loss (0.2)

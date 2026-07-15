@@ -385,8 +385,8 @@ def parse_args():
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--grad_clip", type=float, default=0.0)
     parser.add_argument("--warmup_epochs", type=int, default=0)
-    parser.add_argument("--warmup_lr", type=float, default=1e-6)
-    parser.add_argument("--min_lr", type=float, default=0.0)
+    parser.add_argument("--warmup_lr", type=float, default=None)
+    parser.add_argument("--min_lr", type=float, default=None)
     return parser.parse_args()
 
 

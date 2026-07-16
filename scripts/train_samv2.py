@@ -111,7 +111,7 @@ class TrainSAM:
         self.warmup_steps = getattr(config, "warmup_epochs", 0) * max(len(self.train_loader), 1)
 
         base_lr = config.learning_rate
-        min_lr = getattr(config, "min_lr", base_lr * 1e-3)
+        min_lr = getattr(config, "min_lr", base_lr * 1e-2)
         warmup_lr = getattr(config, "warmup_lr", min_lr * 10)
 
         if self.warmup_steps > 0:

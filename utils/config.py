@@ -151,6 +151,7 @@ class YOLOConfig:
     wandb_name: str = "scar_detection"
     wandb_mode: str = "disabled"
     
+    
 @dataclass
 class YoloSAMInferenceConfig:
     sam_path: str = "checkpoints/sam_vit_b_01ec64.pth"

@@ -39,15 +39,15 @@ class YOLOModel:
         
         # Use absolute paths to avoid relative path issues
         data_yaml = {
-            'path': str(Path(self.config.dataset_path).parent.absolute()),
-            'train': Path(self.config.dataset_path).name + '/images',
-            'val': Path(self.config.val_dataset_path).name + '/images' if self.config.val_dataset_path else 'val/images',
-            'names': {i: name for i, name in enumerate(self.config.class_names)},
-            'nc': len(self.config.class_names)
+            "path": str(Path(self.config.dataset_path).parent.absolute()),
+            "train": Path(self.config.dataset_path).name + "/images",
+            "val": Path(self.config.val_dataset_path).name + "/images" if self.config.val_dataset_path else "val/images",
+            "names": {i: name for i, name in enumerate(self.config.class_names)},
+            "nc": len(self.config.class_names)
         }
         
-        self.dataset_yaml_path = '%s/dataset.yaml' % Path(self.config.dataset_path).parent
-        with open(self.dataset_yaml_path, 'w') as f:
+        self.dataset_yaml_path = "%s/dataset.yaml" % Path(self.config.dataset_path).parent
+        with open(self.dataset_yaml_path, "w") as f:
             yaml.dump(data_yaml, f)
         
         print(f"Created dataset configuration at: {self.dataset_yaml_path}")
@@ -60,52 +60,52 @@ class YOLOModel:
         
         # Merge config with any additional kwargs
         train_config = {
-            'data': str(self.dataset_yaml_path),
-            'epochs': self.config.epochs,
-            'imgsz': self.config.image_size,
-            'batch': self.config.batch_size,
-            'patience': self.config.patience,
-            # 'save_dir': self.config.output_path,
+            "data": str(self.dataset_yaml_path),
+            "epochs": self.config.epochs,
+            "imgsz": self.config.image_size,
+            "batch": self.config.batch_size,
+            "patience": self.config.patience,
+            # "save_dir": self.config.output_path,
             
             # Detection parameters
-            'box': self.config.box_loss_gain,
-            'cls': self.config.cls_loss_gain,
-            'dfl': self.config.dfl_loss_gain,
+            "box": self.config.box_loss_gain,
+            "cls": self.config.cls_loss_gain,
+            "dfl": self.config.dfl_loss_gain,
             
             # Detection thresholds
-            'iou': self.config.iou_threshold,
-            'max_det': self.config.max_detections,
+            "iou": self.config.iou_threshold,
+            "max_det": self.config.max_detections,
             
             # Augmentation parameters
-            'mosaic': self.config.mosaic,
-            'mixup': self.config.mixup,
-            'copy_paste': self.config.copy_paste,
-            'scale': self.config.scale,
-            'fliplr': self.config.fliplr,
-            'flipud': self.config.flipud,
-            'degrees': self.config.degrees,
-            'translate': self.config.translate,
-            'hsv_h': self.config.hsv_h,
-            'hsv_s': self.config.hsv_s,
-            'hsv_v': self.config.hsv_v,
+            "mosaic": self.config.mosaic,
+            "mixup": self.config.mixup,
+            "copy_paste": self.config.copy_paste,
+            "scale": self.config.scale,
+            "fliplr": self.config.fliplr,
+            "flipud": self.config.flipud,
+            "degrees": self.config.degrees,
+            "translate": self.config.translate,
+            "hsv_h": self.config.hsv_h,
+            "hsv_s": self.config.hsv_s,
+            "hsv_v": self.config.hsv_v,
             
             # Optimizer parameters
-            'lr0': self.config.learning_rate,
-            'lrf': self.config.final_lr_ratio,
-            'warmup_epochs': self.config.warmup_epochs,
-            'weight_decay': self.config.weight_decay,
+            "lr0": self.config.learning_rate,
+            "lrf": self.config.final_lr_ratio,
+            "warmup_epochs": self.config.warmup_epochs,
+            "weight_decay": self.config.weight_decay,
             
             # Save settings
-            'save_period': self.config.save_period,
-            'project': self.config.project_name,
-            'name': self.config.experiment_name,
+            "save_period": self.config.save_period,
+            "project": self.config.project_name,
+            "name": self.config.experiment_name,
             
             # Multi-scale training
-            'multi_scale': self.config.multi_scale,
+            "multi_scale": self.config.multi_scale,
             
             # Device
-            'device': self.config.device,
-            'compile': self.config.compile,
+            "device": self.config.device,
+            "compile": self.config.compile,
         }
         
         # Update with any additional kwargs
@@ -124,12 +124,12 @@ class YOLOModel:
             raise ValueError("Model not loaded. Please load a model first.")
         
         predict_config = {
-            'conf': self.config.conf_threshold,
-            'iou': self.config.iou_threshold,
-            'max_det': self.config.max_detections,
-            'augment': self.config.test_time_augmentation,
-            'device': self.device,
-            'verbose': False,
+            "conf": self.config.conf_threshold,
+            "iou": self.config.iou_threshold,
+            "max_det": self.config.max_detections,
+            "augment": self.config.test_time_augmentation,
+            "device": self.device,
+            "verbose": False,
         }
         
         # Update with any additional kwargs
@@ -144,8 +144,8 @@ class YOLOModel:
             raise ValueError("Model not loaded. Please load a model first.")
         
         val_config = {
-            'data': str(self.dataset_yaml_path) if self.dataset_yaml_path else None,
-            'device': self.device,
+            "data": str(self.dataset_yaml_path) if self.dataset_yaml_path else None,
+            "device": self.device,
         }
         
         # Update with any additional kwargs
@@ -162,7 +162,7 @@ class YOLOModel:
         self.model.save(str(path))
         print(f"Model saved to: {path}")
     
-    def export(self, format: str = 'onnx', **kwargs):
+    def export(self, format: str = "onnx", **kwargs):
         """Export the model to different formats."""
         if not self.model:
             raise ValueError("Model not loaded. Cannot export.")

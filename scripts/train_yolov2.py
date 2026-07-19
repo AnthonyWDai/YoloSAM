@@ -181,8 +181,15 @@ def parse_args():
         default=640, # 960, 1024
     )
     parser.add_argument(
-        "--multi_scale",
+        "--multi-scale",
         action="store_true",
+        help="Enable multi-scale inference/training by evaluating inputs at multiple image scales.",
+    )
+    parser.add_argument(
+        "--tta",
+        "--test-time-augmentation",
+        action="store_true",
+        help="Enable test-time augmentation by averaging predictions over augmented input variants.",
     )
 
     return parser.parse_args()
@@ -194,6 +201,8 @@ def main():
     args = parse_args()
 
     config = YOLOConfig(
+        compile=False,
+
         # Model settings
         model_type=args.model_type,
         pretrained_path=args.pretrained_path,
@@ -215,26 +224,26 @@ def main():
         mosaic=0.,      # or 0.0 if anatomy becomes unrealistic
         mixup=0,        # often not ideal for medical lesion detection
         copy_paste=0.,   # only if masks/boxes are accurate and pasted lesions stay realistic
-        degrees=5.0,      # reduce geometric distortion
+        degrees=3.0,      # reduce geometric distortion
         flipud=0.0,       # usually avoid unless anatomically valid
         fliplr=0.5,       # acceptable in many whole-body setups, task-dependent
         hsv_h=0.0,
         hsv_s=0.0,
         hsv_v=0.0,
-        translate=0.05,
-        scale=0.05,
+        translate=0.02,   # reduce movement to avoid losing tiny objects
+        scale=0.10,       # small scale jitter only
         erasing=0.0,
         
         # Detection parameters
-        iou_threshold=0.2,
+        iou_threshold=0.5,
         conf_threshold=0.05,
-        max_detections=30,
+        max_detections=100,
 
         # Training settings
-        multi_scale=args.multi_scale,
-        test_time_augmentation=False,
+        multi_scale=args.multi_scale,                        # recommended for tiny objects on small fixed-size images
+        test_time_augmentation=args.test_time_augmentation,  # start off disabled; enable later only if it improves validation
         save_period=50,
-    
+
         # Optimizer parameters
         learning_rate=args.learning_rate,
         

@@ -180,6 +180,10 @@ def parse_args():
         type=int,
         default=640, # 960, 1024
     )
+    parser.add_argument(
+        "--multi_scale",
+        action="store_true",
+    )
 
     return parser.parse_args()
 
@@ -227,7 +231,7 @@ def main():
         max_detections=30,
 
         # Training settings
-        multi_scale=False,
+        multi_scale=args.multi_scale,
         test_time_augmentation=False,
         save_period=50,
     

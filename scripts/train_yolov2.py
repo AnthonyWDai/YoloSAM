@@ -218,7 +218,7 @@ def main():
         epochs=300,
         batch_size=args.batch_size,
         image_size=args.image_size, # 960, 1024
-        patience=50,
+        patience=80,
         
         # Augmentation (optimized for medical scars)
         mosaic=0.,      # or 0.0 if anatomy becomes unrealistic
@@ -231,18 +231,19 @@ def main():
         hsv_s=0.0,
         hsv_v=0.0,
         translate=0.02,   # reduce movement to avoid losing tiny objects
-        scale=0.10,       # small scale jitter only
+        scale=0.05,       # small scale jitter only
         erasing=0.0,
         
         # Detection parameters
         iou_threshold=0.5,
         conf_threshold=0.05,
-        max_detections=100,
+        max_detections=200,
 
         # Training settings
         multi_scale=args.multi_scale,                        # recommended for tiny objects on small fixed-size images
         test_time_augmentation=args.test_time_augmentation,  # start off disabled; enable later only if it improves validation
-        save_period=50,
+        save_period=80,
+        rect=True,
 
         # Optimizer parameters
         learning_rate=args.learning_rate,

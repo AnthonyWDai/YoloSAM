@@ -21,6 +21,7 @@ class SAMFinetuneConfig:
     warmup_epochs: int = 10
     warmup_lr: float = None
     min_lr: float = None
+    grad_clip: float = 10
 
     
     # loss Dice + BCE + KL divergence -> Dice = 1 - BCE - KL
@@ -64,6 +65,9 @@ class SAMDatasetConfig:
     
     # train or val
     train: bool = True
+    
+    # rectangle training
+    rect: bool = False
     
     # remove non-scar
     remove_nonscar: bool = True

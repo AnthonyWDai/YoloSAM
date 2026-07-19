@@ -186,7 +186,6 @@ def parse_args():
         help="Enable multi-scale inference/training by evaluating inputs at multiple image scales.",
     )
     parser.add_argument(
-        "--tta",
         "--test-time-augmentation",
         action="store_true",
         help="Enable test-time augmentation by averaging predictions over augmented input variants.",
@@ -219,6 +218,7 @@ def main():
         batch_size=args.batch_size,
         image_size=args.image_size, # 960, 1024
         patience=80,
+        # rectangle training
         
         # Augmentation (optimized for medical scars)
         mosaic=0.,      # or 0.0 if anatomy becomes unrealistic

@@ -66,9 +66,6 @@ class SAMDatasetConfig:
     # train or val
     train: bool = True
     
-    # rectangle training
-    rect: bool = False
-    
     # remove non-scar
     remove_nonscar: bool = True
     
@@ -116,6 +113,7 @@ class YOLOConfig:
     batch_size: int = 16
     image_size: int = 640
     patience: int = 50
+    rect: bool = False
     
     # Loss weights
     box_loss_gain: float = 7.5
